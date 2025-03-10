@@ -11,3 +11,6 @@ ktor:
         driver: "org.mariadb.jdbc.Driver"
         username: "maria"
         password: "maria"
+
+    path:
+        images: "upload/images"

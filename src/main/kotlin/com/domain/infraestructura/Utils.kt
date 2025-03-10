@@ -11,41 +11,46 @@ import javax.imageio.ImageIO
 
 class Utils {
     companion object{
-        fun createBase64ToImg(img: String, nombre: String) : String?{
-            val groupExtension = listOf("jpg", "jpeg", "gif")
-            val regex = "data:(image/[^;]+);base64,(.+)".toRegex()
+        fun createBase64ToImg(img: String, nombre: String): String? {
+            val groupExtension = listOf("jpg", "jpeg", "gif", "png")
+            val regex = "data:image/([^;]+);base64,(.+)".toRegex()
             val result = regex.find(img)
 
             return if (result != null) {
                 val type = result.groupValues[1]
                 var ext: String = type.split("/")[1]
                 val body = result.groupValues[2]
-                if (ext !in groupExtension)
-                    return null
+
+                // Verificar si la extensión es válida
+                if (ext !in groupExtension) return null
+
                 try {
-                    if (ext =="jpg")
-                        ext = "jpeg"
+                    if (ext == "jpg") ext = "jpeg"
 
                     val imgBytes = Base64.getDecoder().decode(body)
                     val inputStream = ByteArrayInputStream(imgBytes)
                     val bufferImage: BufferedImage = ImageIO.read(inputStream)
-                    val path : String = ApplicationContext.context.environment.config.property("ktor.path.images").getString() + "/$nombre"
+                    val path: String = ApplicationContext.context.environment.config.property("ktor.path.images").getString() + "/$nombre"
                     val dir = File(path)
-                    if (dir.isDirectory){
-                        val nFile: String = path+"/"
-                        val nameFile = nombre+"_${SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())}.$ext"
-                        val fileImag = File(nFile+nameFile)
+
+                    if (dir.isDirectory) {
+                        val nFile: String = path + "/"
+                        val nameFile = nombre + "_" + SimpleDateFormat("yyyyMMdd_HHmmss").format(Date()) + ".$ext"
+                        val fileImag = File(nFile + nameFile)
                         ImageIO.write(bufferImage, ext, fileImag)
-                        return nameFile.toString()
-                    }else{
+                        return nameFile
+                    } else {
                         return null
                     }
-                }catch (e : Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                     return null
                 }
-            } else null
+            } else {
+                return null
+            }
         }
+
 
 
         fun deleteImage(nombre: String, name: String):Boolean{
